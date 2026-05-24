@@ -1,0 +1,229 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="fw-bold">{{ change_request.title }}</h2>
+        <p class="text-muted mb-0">
+            Requested by {{ change_request.requested_by.username }}
+            on {{ change_request.created_at|date:"d M Y H:i" }}
+        </p>
+    </div>
+
+    <div>
+        {% if can_approve %}
+            {% if change_request.status == 'submitted' or change_request.status == 'under_review' %}
+                <a href="{% url 'changes:approve_change' change_request.id %}" class="btn btn-success">
+                    Approve
+                </a>
+                <a href="{% url 'changes:reject_change' change_request.id %}" class="btn btn-danger">
+                    Reject
+                </a>
+            {% endif %}
+        {% endif %}
+
+        {% if can_edit %}
+            <a href="{% url 'changes:change_update' change_request.id %}" class="btn btn-primary">
+                Edit
+            </a>
+        {% endif %}
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8">
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h5 class="fw-bold">Change Description</h5>
+
+                <h6 class="fw-bold mt-3">Reason for Change</h6>
+                <p>{{ change_request.reason }}</p>
+
+                <h6 class="fw-bold">Current State</h6>
+                <p>{{ change_request.current_state }}</p>
+
+                <h6 class="fw-bold">Proposed Change</h6>
+                <p>{{ change_request.proposed_change }}</p>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h5 class="fw-bold">Impact Assessment</h5>
+
+                <h6 class="fw-bold mt-3">Business Impact</h6>
+                <p>{{ change_request.business_impact }}</p>
+
+                <h6 class="fw-bold">Technical Impact</h6>
+                <p>{{ change_request.technical_impact }}</p>
+
+                <h6 class="fw-bold">Security Impact</h6>
+                <p>{{ change_request.security_impact|default:"No specific security impact recorded." }}</p>
+
+                {% if change_request.is_high_risk %}
+                    <div class="alert alert-danger">
+                        This is a high-risk change and requires careful review before release.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h5 class="fw-bold">Implementation, Testing and Rollback</h5>
+
+                <h6 class="fw-bold mt-3">Implementation Plan</h6>
+                <p>{{ change_request.implementation_plan }}</p>
+
+                <h6 class="fw-bold">Testing Plan</h6>
+                <p>{{ change_request.testing_plan }}</p>
+
+                <h6 class="fw-bold">Rollback Plan</h6>
+                <p>{{ change_request.rollback_plan }}</p>
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h5 class="fw-bold">Comments</h5>
+
+                {% for comment in comments %}
+                    <div class="border rounded p-3 mb-2">
+                        <div class="d-flex justify-content-between">
+                            <strong>{{ comment.author.username }}</strong>
+                            <small class="text-muted">
+                                {{ comment.created_at|date:"d M Y H:i" }}
+                            </small>
+                        </div>
+
+                        {% if comment.is_internal %}
+                            <span class="badge bg-warning text-dark">Internal</span>
+                        {% endif %}
+
+                        <p class="mb-0 mt-2">{{ comment.comment }}</p>
+                    </div>
+                {% empty %}
+                    <p class="text-muted">No comments yet.</p>
+                {% endfor %}
+
+                <form method="post" class="mt-3">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label">Add Comment</label>
+                        {{ comment_form.comment }}
+                    </div>
+
+                    {% if can_view_internal %}
+                        <div class="form-check mb-3">
+                            {{ comment_form.is_internal }}
+                            <label class="form-check-label">Internal Comment</label>
+                        </div>
+                    {% endif %}
+
+                    <button type="submit" class="btn btn-dark">
+                        Add Comment
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-4">
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h5 class="fw-bold">Request Details</h5>
+
+                <p><strong>Type:</strong> {{ change_request.get_change_type_display }}</p>
+                <p><strong>Risk:</strong> {{ change_request.get_risk_level_display }}</p>
+                <p><strong>Status:</strong> {{ change_request.get_status_display }}</p>
+
+                <p>
+                    <strong>Assigned To:</strong>
+                    {% if change_request.assigned_to %}
+                        {{ change_request.assigned_to.username }}
+                    {% else %}
+                        Not assigned
+                    {% endif %}
+                </p>
+
+                <p>
+                    <strong>Approved By:</strong>
+                    {% if change_request.approved_by %}
+                        {{ change_request.approved_by.username }}
+                    {% else %}
+                        Not approved
+                    {% endif %}
+                </p>
+
+                <p>
+                    <strong>Target Release:</strong>
+                    {% if change_request.target_release_date %}
+                        {{ change_request.target_release_date|date:"d M Y" }}
+                    {% else %}
+                        Not set
+                    {% endif %}
+                </p>
+
+                {% if change_request.is_overdue %}
+                    <div class="alert alert-danger">
+                        This change request is overdue.
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="card shadow-sm mb-3">
+            <div class="card-body">
+                <h5 class="fw-bold">Review Notes</h5>
+
+                <h6 class="fw-bold">Approval Notes</h6>
+                <p>{{ change_request.approval_notes|default:"No approval notes yet." }}</p>
+
+                <h6 class="fw-bold">Implementation Notes</h6>
+                <p>{{ change_request.implementation_notes|default:"No implementation notes yet." }}</p>
+
+                <h6 class="fw-bold">Testing Notes</h6>
+                <p>{{ change_request.testing_notes|default:"No testing notes yet." }}</p>
+
+                <h6 class="fw-bold">Closure Notes</h6>
+                <p>{{ change_request.closure_notes|default:"No closure notes yet." }}</p>
+            </div>
+        </div>
+
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <h5 class="fw-bold">Change History</h5>
+
+                {% for item in history %}
+                    <div class="border-start border-3 ps-2 mb-2">
+                        <small class="text-muted">
+                            {{ item.changed_at|date:"d M Y H:i" }}
+                        </small>
+                        <p class="mb-0">
+                            <strong>{{ item.field_name }}</strong>
+                            changed from
+                            <em>{{ item.old_value }}</em>
+                            to
+                            <em>{{ item.new_value }}</em>
+                        </p>
+                        {% if item.changed_by %}
+                            <small>By {{ item.changed_by.username }}</small>
+                        {% endif %}
+                    </div>
+                {% empty %}
+                    <p class="text-muted">No change history yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,334 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="mb-4">
+    <h1 class="fw-bold">VIT Quality Management Dashboard</h1>
+    <p class="text-muted">
+        Monitor software quality issues, defects, security concerns, non-conformance,
+        and controlled change requests.
+    </p>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4 col-lg-2">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Total Issues</p>
+                <h3 class="fw-bold">{{ total_issues }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 col-lg-2">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Open Issues</p>
+                <h3 class="fw-bold">{{ open_issues }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 col-lg-2">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Resolved Issues</p>
+                <h3 class="fw-bold">{{ resolved_issues }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 col-lg-2">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Critical Issues</p>
+                <h3 class="fw-bold text-danger">{{ critical_issues }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 col-lg-2">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Security Issues</p>
+                <h3 class="fw-bold">{{ security_issues }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 col-lg-2">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Overdue Issues</p>
+                <h3 class="fw-bold text-warning">{{ overdue_issues }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-md-4 col-lg-2">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Total Changes</p>
+                <h3 class="fw-bold">{{ total_changes }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 col-lg-2">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Pending Changes</p>
+                <h3 class="fw-bold">{{ pending_changes }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 col-lg-2">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Approved Changes</p>
+                <h3 class="fw-bold">{{ approved_changes }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 col-lg-2">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Released Changes</p>
+                <h3 class="fw-bold">{{ released_changes }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 col-lg-2">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">High Risk</p>
+                <h3 class="fw-bold text-danger">{{ high_risk_changes }}</h3>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-4 col-lg-2">
+        <div class="card shadow-sm border-0 h-100">
+            <div class="card-body">
+                <p class="text-muted mb-1">Overdue Changes</p>
+                <h3 class="fw-bold text-warning">{{ overdue_changes }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3 mb-4">
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="fw-bold">Issues by Status</h5>
+                <canvas id="issueStatusChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="fw-bold">Issues by Severity</h5>
+                <canvas id="issueSeverityChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="fw-bold">Issues by Type</h5>
+                <canvas id="issueTypeChart"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="fw-bold">Change Requests by Risk</h5>
+                <canvas id="changeRiskChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="fw-bold">Recent Quality Issues</h5>
+
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Severity</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for issue in recent_issues %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'quality:issue_detail' issue.id %}">
+                                            {{ issue.title }}
+                                        </a>
+                                    </td>
+                                    <td>{{ issue.get_severity_display }}</td>
+                                    <td>{{ issue.get_status_display }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-muted">
+                                        No recent issues.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <a href="{% url 'quality:issue_list' %}" class="btn btn-outline-primary btn-sm">
+                    View All Issues
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-body">
+                <h5 class="fw-bold">Recent Change Requests</h5>
+
+                <div class="table-responsive">
+                    <table class="table table-sm align-middle">
+                        <thead>
+                            <tr>
+                                <th>Title</th>
+                                <th>Risk</th>
+                                <th>Status</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for change_request in recent_changes %}
+                                <tr>
+                                    <td>
+                                        <a href="{% url 'changes:change_detail' change_request.id %}">
+                                            {{ change_request.title }}
+                                        </a>
+                                    </td>
+                                    <td>{{ change_request.get_risk_level_display }}</td>
+                                    <td>{{ change_request.get_status_display }}</td>
+                                </tr>
+                            {% empty %}
+                                <tr>
+                                    <td colspan="3" class="text-muted">
+                                        No recent change requests.
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                <a href="{% url 'changes:change_list' %}" class="btn btn-outline-primary btn-sm">
+                    View All Changes
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{{ issue_status_labels|json_script:"issue-status-labels" }}
+{{ issue_status_values|json_script:"issue-status-values" }}
+
+{{ issue_severity_labels|json_script:"issue-severity-labels" }}
+{{ issue_severity_values|json_script:"issue-severity-values" }}
+
+{{ issue_type_labels|json_script:"issue-type-labels" }}
+{{ issue_type_values|json_script:"issue-type-values" }}
+
+{{ change_risk_labels|json_script:"change-risk-labels" }}
+{{ change_risk_values|json_script:"change-risk-values" }}
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<script>
+    function getJsonData(elementId) {
+        return JSON.parse(document.getElementById(elementId).textContent);
+    }
+
+    function createBarChart(canvasId, labelsId, valuesId, chartLabel) {
+        const labels = getJsonData(labelsId);
+        const values = getJsonData(valuesId);
+        const canvas = document.getElementById(canvasId);
+
+        if (!canvas) {
+            return;
+        }
+
+        new Chart(canvas, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: chartLabel,
+                    data: values
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: {
+                            precision: 0
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    createBarChart(
+        'issueStatusChart',
+        'issue-status-labels',
+        'issue-status-values',
+        'Issues'
+    );
+
+    createBarChart(
+        'issueSeverityChart',
+        'issue-severity-labels',
+        'issue-severity-values',
+        'Issues'
+    );
+
+    createBarChart(
+        'issueTypeChart',
+        'issue-type-labels',
+        'issue-type-values',
+        'Issues'
+    );
+
+    createBarChart(
+        'changeRiskChart',
+        'change-risk-labels',
+        'change-risk-values',
+        'Change Requests'
+    );
+</script>
+{% endblock %}

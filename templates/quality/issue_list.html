@@ -1,0 +1,135 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <div>
+        <h2 class="fw-bold">Quality Issues</h2>
+        <p class="text-muted mb-0">
+            Track software bugs, incidents, vulnerabilities, and non-conformance reports.
+        </p>
+    </div>
+
+    <a href="{% url 'quality:issue_create' %}" class="btn btn-primary">
+        Submit Issue
+    </a>
+</div>
+
+{% if messages %}
+    {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}">
+            {{ message }}
+        </div>
+    {% endfor %}
+{% endif %}
+
+<div class="card shadow-sm mb-3">
+    <div class="card-body">
+        <form method="get" class="row g-2">
+            <div class="col-md-4">
+                <input
+                    type="text"
+                    name="q"
+                    value="{{ search_query }}"
+                    class="form-control"
+                    placeholder="Search title, description, or system"
+                >
+            </div>
+
+            <div class="col-md-2">
+                <select name="status" class="form-select">
+                    <option value="">All Status</option>
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if status_filter == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <select name="type" class="form-select">
+                    <option value="">All Types</option>
+                    {% for value, label in type_choices %}
+                        <option value="{{ value }}" {% if type_filter == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <select name="severity" class="form-select">
+                    <option value="">All Severity</option>
+                    {% for value, label in severity_choices %}
+                        <option value="{{ value }}" {% if severity_filter == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="col-md-2">
+                <button type="submit" class="btn btn-dark w-100">Filter</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card shadow-sm">
+    <div class="table-responsive">
+        <table class="table table-hover align-middle mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Title</th>
+                    <th>Type</th>
+                    <th>Severity</th>
+                    <th>Priority</th>
+                    <th>Status</th>
+                    <th>Reported By</th>
+                    <th>Assigned To</th>
+                    <th>Created</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {% for issue in issues %}
+                    <tr>
+                        <td>
+                            <a href="{% url 'quality:issue_detail' issue.id %}" class="fw-semibold">
+                                {{ issue.title }}
+                            </a>
+                        </td>
+                        <td>{{ issue.get_issue_type_display }}</td>
+                        <td>
+                            <span class="badge bg-secondary">
+                                {{ issue.get_severity_display }}
+                            </span>
+                        </td>
+                        <td>{{ issue.get_priority_display }}</td>
+                        <td>
+                            <span class="badge bg-info text-dark">
+                                {{ issue.get_status_display }}
+                            </span>
+                        </td>
+                        <td>{{ issue.reported_by.username }}</td>
+                        <td>
+                            {% if issue.assigned_to %}
+                                {{ issue.assigned_to.username }}
+                            {% else %}
+                                <span class="text-muted">Not assigned</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ issue.created_at|date:"d M Y" }}</td>
+                    </tr>
+                {% empty %}
+                    <tr>
+                        <td colspan="8" class="text-center py-4 text-muted">
+                            No quality issues found.
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,95 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-9">
+        <div class="card shadow-sm">
+            <div class="card-body p-4">
+                <h3 class="fw-bold mb-3">Submit Quality Issue</h3>
+
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }}">
+                            {{ message }}
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <form method="post" enctype="multipart/form-data" novalidate>
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label class="form-label">Title</label>
+                        {{ form.title }}
+                        {% for error in form.title.errors %}
+                            <div class="text-danger small">{{ error }}</div>
+                        {% endfor %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Description</label>
+                        {{ form.description }}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Issue Type</label>
+                            {{ form.issue_type }}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Severity</label>
+                            {{ form.severity }}
+                        </div>
+
+                        <div class="col-md-4 mb-3">
+                            <label class="form-label">Priority</label>
+                            {{ form.priority }}
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Affected System</label>
+                        {{ form.affected_system }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Expected Result</label>
+                        {{ form.expected_result }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Actual Result</label>
+                        {{ form.actual_result }}
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label">Steps to Reproduce</label>
+                        {{ form.steps_to_reproduce }}
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Attachment</label>
+                            {{ form.attachment }}
+                        </div>
+
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Due Date</label>
+                            {{ form.due_date }}
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        Submit Issue
+                    </button>
+
+                    <a href="{% url 'quality:issue_list' %}" class="btn btn-outline-secondary">
+                        Cancel
+                    </a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
